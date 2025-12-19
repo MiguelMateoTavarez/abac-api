@@ -5,11 +5,46 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat    = "cjs"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "sqlite"
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  role    Role     @relation(fields: [roleId], references: [id])
+  roleId  Int
+  tickets Ticket[]
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  permissions Permission[]
+  users       User[]
+}
+
+model Permission {
+  id         Int     @id @default(autoincrement())
+  action     String
+  subject    String
+  conditions Json?
+  fields     Json?
+  inverted   Boolean @default(false)
+  reason     String?
+  roles      Role[]
+}
+
+model Ticket {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  status      String @default("OPEN")
+  owner       User   @relation(fields: [ownerId], references: [id])
+  ownerId     Int
 }
